@@ -1,0 +1,27 @@
+package udacity.nanodegree.android.manishpathak.in.popularmovies.network.service;
+
+import retrofit2.Call;
+import retrofit2.http.GET;
+import retrofit2.http.Query;
+import udacity.nanodegree.android.manishpathak.in.popularmovies.model.MovieModel;
+
+/**
+ *
+ *This class is used to defining the Endpoints
+ * Created by manishpathak on 3/8/16.
+ */
+public interface ApiService {
+
+//    What are the highest rated movies rated R?
+//    /discover/movie/?certification_country=US&certification=R&sort_by=vote_average.desc
+
+//    What are the most popular movies?
+//    /discover/movie?sort_by=popularity.desc
+
+        @GET ("/3/discover/movie")
+        Call<MovieModel> getMovieList(@Query("sort_by") String sort_type,
+                                      @Query("api_key") String api_key,
+                                      @Query("page") int page,
+                                      @Query("include_adult") boolean includeAdult);
+
+}

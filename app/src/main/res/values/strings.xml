@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Popular Movies</string>
+    <string name="action_settings">Settings</string>
+    <string name="sort">Sort</string>
+    <string name="movie_details_rating">Average Rating: %1$s</string>
+    <string name="movie_details_votes">Vote Count: %1$s</string>
+    <string name="movie_details_genre">Genre: %1$s</string>
+</resources>
