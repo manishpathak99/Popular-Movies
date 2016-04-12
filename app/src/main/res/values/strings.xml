@@ -5,4 +5,7 @@
     <string name="movie_details_rating">Average Rating: %1$s</string>
     <string name="movie_details_votes">Vote Count: %1$s</string>
     <string name="movie_details_genre">Genre: %1$s</string>
+    <string name="overview">Overview</string>
+    <string name="trailers">Trailers</string>
+    <string name="reviews">Reviews</string>
 </resources>

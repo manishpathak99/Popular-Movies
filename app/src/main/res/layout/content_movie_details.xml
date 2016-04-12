@@ -1,5 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
-
 <android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -95,7 +93,7 @@
                     android:layout_height="wrap_content"
                     android:paddingTop="@dimen/heading_padding"
                     android:paddingLeft="@dimen/heading_padding"
-                    android:text="Overview"
+                    android:text="@string/overview"
                     android:textAppearance="@style/TextAppearance.AppCompat.Title"
                     android:textColor="@android:color/black"
                     android:visibility="visible"/>
@@ -109,6 +107,14 @@
                     android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                     android:textColor="@android:color/black"/>
             </LinearLayout>
+
+            <include layout="@layout/divider"/>
+
+            <include
+                layout="@layout/trailers_and_reviews"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/black"/>
 
         </LinearLayout>
     </android.support.v7.widget.CardView>
