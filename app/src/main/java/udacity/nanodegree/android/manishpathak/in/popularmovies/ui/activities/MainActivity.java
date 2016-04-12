@@ -17,7 +17,6 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.RelativeLayout;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -33,6 +32,9 @@ import udacity.nanodegree.android.manishpathak.in.popularmovies.util.AppSettings
 import udacity.nanodegree.android.manishpathak.in.popularmovies.util.NetworkUtil;
 
 public class MainActivity extends BaseActivity implements SwipeRefreshLayout.OnRefreshListener, DialogInterface.OnClickListener{
+
+    private static final String STATE_MOVIES = "state_movies";
+    private static final String STATE_PAGE_COUNT = "state_movie_page_count";
 
     @Bind(R.id.recycler_view)
     public RecyclerView mRecyclerView;
@@ -81,6 +83,12 @@ public class MainActivity extends BaseActivity implements SwipeRefreshLayout.OnR
         setSupportActionBar(toolbar);
 //        Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
 //                .setAction("Action", null).show();
+        if (savedInstanceState != null) {
+            mPageCount = savedInstanceState.getInt(STATE_PAGE_COUNT, 1);
+        }
+        ArrayList<MoviesResponseModel> restoredMovies = savedInstanceState != null
+                ? savedInstanceState.<MoviesResponseModel>getParcelableArrayList(STATE_MOVIES) : new ArrayList<MoviesResponseModel>();
+        mMovieAdapter = new MovieAdapter(this, restoredMovies);
         init();
         fetchMovieList(1);
     }
@@ -97,8 +105,6 @@ public class MainActivity extends BaseActivity implements SwipeRefreshLayout.OnR
         swipeLayout.setColorSchemeResources(android.R.color.holo_red_light);
 
         // Specify Adapter for RecyclerView
-        List data = new ArrayList<>();
-        mMovieAdapter = new MovieAdapter(this, data);
         mRecyclerView.setAdapter(mMovieAdapter);
     }
 
@@ -120,6 +126,13 @@ public class MainActivity extends BaseActivity implements SwipeRefreshLayout.OnR
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList(STATE_MOVIES, new ArrayList<>(mMovieAdapter.getMovies()));
+        outState.putInt(STATE_PAGE_COUNT, mPageCount);
     }
 
     private void fetchMovieList(final int pageCount) {
