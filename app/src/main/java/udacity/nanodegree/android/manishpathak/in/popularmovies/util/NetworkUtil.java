@@ -30,7 +30,12 @@ public class NetworkUtil {
     }
 
     public static void showNetWorkSnackBar(final Activity activity){
-            Snackbar.make(activity.findViewById(android.R.id.content), "Check internet connectivity", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show();
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Snackbar.make(activity.findViewById(android.R.id.content), "Check internet connectivity", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+        });
         }
 }
