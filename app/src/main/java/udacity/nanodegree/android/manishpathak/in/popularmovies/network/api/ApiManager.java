@@ -8,6 +8,8 @@ import java.io.IOException;
 import okhttp3.ResponseBody;
 import udacity.nanodegree.android.manishpathak.in.popularmovies.model.BaseModel;
 import udacity.nanodegree.android.manishpathak.in.popularmovies.model.MovieModel;
+import udacity.nanodegree.android.manishpathak.in.popularmovies.model.ReviewModel;
+import udacity.nanodegree.android.manishpathak.in.popularmovies.model.VideoModel;
 
 /**
  * This class is used to manage all web service api
@@ -16,12 +18,24 @@ import udacity.nanodegree.android.manishpathak.in.popularmovies.model.MovieModel
 public class ApiManager {
 
     private static ApiManager apiManager;
-    private MoviesApi moviesApi;
+
+    @Nullable
+    private MoviesApi mMoviesApi = null;
+    @Nullable
+    private ReviewsApi mReviewsApi = null;
+    @Nullable
+    private VideosApi mVideosApi = null;
 
     @Nullable
     private ProgressListener<MovieModel> moviesFetchListener;
+    @Nullable
+    private ProgressListener<ReviewModel> reviewFetchListener;
+    @Nullable
+    private ProgressListener<VideoModel> videoFetchListener;
 
     private boolean isMoviesAPILoading = false;
+    private boolean isReviewsAPILoading = false;
+    private boolean isVideosAPILoading = false;
 
     /**
      * Gets single instance.
@@ -36,12 +50,30 @@ public class ApiManager {
     }
 
     @NonNull
-    private MoviesApi getMoviesApi() {
-        if (moviesApi != null) {
-            moviesApi.clearListener();
+    private MoviesApi getmMoviesApi() {
+        if (mMoviesApi != null) {
+            mMoviesApi.clearListener();
         }
-        moviesApi = new MoviesApi();
-        return moviesApi;
+        mMoviesApi = new MoviesApi();
+        return mMoviesApi;
+    }
+
+    @NonNull
+    private ReviewsApi getReviewsApi() {
+        if (mReviewsApi != null) {
+            mReviewsApi.clearListener();
+        }
+        mReviewsApi = new ReviewsApi();
+        return mReviewsApi;
+    }
+
+    @NonNull
+    private VideosApi getVideosApi() {
+        if (mVideosApi != null) {
+            mVideosApi.clearListener();
+        }
+        mVideosApi = new VideosApi();
+        return mVideosApi;
     }
 
     /**
@@ -62,7 +94,7 @@ public class ApiManager {
         }
         isMoviesAPILoading = true;
 
-        getMoviesApi().fetchMoviesList(new BaseApi.BaseApiListener() {
+        getmMoviesApi().fetchMoviesList(new BaseApi.BaseApiListener() {
             @Override
             public void onRequestCompleted(BaseModel responseModel) {
                 isMoviesAPILoading = false;
@@ -101,6 +133,121 @@ public class ApiManager {
             }
 
         }, sortOrder, pageCount);
+    }
+
+    /**
+     * Fetch reviews list.
+     *
+     * @param listener  the listener
+     * @param movieId   the movie id
+     * @param pageCount the page count
+     */
+    public void fetchReviewsList(ProgressListener<ReviewModel> listener, long movieId, int pageCount) {
+
+        reviewFetchListener = listener;
+        if (reviewFetchListener != null) {
+            reviewFetchListener.inProgress();
+        }
+        if (isReviewsAPILoading) {
+            return;
+        }
+        isReviewsAPILoading = true;
+
+        getReviewsApi().fetchReviewsList(new BaseApi.BaseApiListener() {
+            @Override
+            public void onRequestCompleted(BaseModel responseModel) {
+                isReviewsAPILoading = false;
+                // return data
+                if (reviewFetchListener != null) {
+                    ReviewModel responseBean = (ReviewModel) responseModel;
+                    reviewFetchListener.completed(responseBean);
+                    reviewFetchListener = null;
+                }
+            }
+
+            @Override
+            public void onRequestFailed(ResponseBody errorBody) {
+                // return error
+                isReviewsAPILoading = false;
+                try {
+                if (reviewFetchListener != null) {
+                    reviewFetchListener.failed(errorBody.string());
+                    reviewFetchListener = null;
+                }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onRequestFailed(Throwable throwable) {
+                // return error
+                isReviewsAPILoading = false;
+                if (reviewFetchListener != null) {
+                    reviewFetchListener.failed(throwable.getMessage());
+                    reviewFetchListener = null;
+                }
+            }
+        }, movieId, pageCount);
+    }
+
+    /**
+     * Fetch videos list.
+     *
+     * @param listener the listener
+     * @param movieId  the movie id
+     */
+    public void fetchVideosList(ProgressListener<VideoModel> listener, long movieId) {
+
+        videoFetchListener = listener;
+        if (videoFetchListener != null) {
+            videoFetchListener.inProgress();
+        }
+        if (isVideosAPILoading) {
+            return;
+        }
+        isVideosAPILoading = true;
+
+        getVideosApi().fetchVideosList(new BaseApi.BaseApiListener() {
+            @Override
+            public void onRequestCompleted(BaseModel responseModel) {
+                isVideosAPILoading = false;
+                // return data
+                if (videoFetchListener != null) {
+                    VideoModel responseBean = (VideoModel)responseModel;
+                    videoFetchListener.completed(responseBean);
+                    videoFetchListener = null;
+                }
+            }
+
+            @Override
+            public void onRequestFailed(ResponseBody errorBody) {
+                isVideosAPILoading = false;
+                // return error
+                try {
+                if (videoFetchListener != null) {
+
+                        videoFetchListener.failed(errorBody.string());
+
+                    videoFetchListener = null;
+                }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onRequestFailed(Throwable throwable) {
+                isVideosAPILoading = false;
+                // return error
+                if (videoFetchListener != null) {
+                    videoFetchListener.failed(throwable.getMessage());
+                    videoFetchListener = null;
+                }
+            }
+
+
+        }, movieId);
     }
 
     /**

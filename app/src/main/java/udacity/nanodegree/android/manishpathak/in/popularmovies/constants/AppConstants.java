@@ -16,12 +16,7 @@ public final class AppConstants {
     public static final String SORT_BY_POPULARITY        = "popularity.desc";
     public static final String SORT_BY_RATING      = "vote_average.desc";
     public static final String INTENT_EXTRA      = "intent_extra";
-
-    // AppSetting constants
-    public static final class AppSettings {
-        public static final String CLICKED_SORTED_BY = "clicked_sort_by";
-    }
-
+    public static final String SITE_YOUTUBE      = "YouTube";
     public static Map<Integer, String> genreMap = createGenreMap();
 
     private static Map<Integer, String> createGenreMap(){
@@ -48,5 +43,10 @@ public final class AppConstants {
         genreMap.put(37, "Western");
         Collections.unmodifiableMap(genreMap);
         return genreMap;
+    }
+
+    // AppSetting constants
+    public static final class AppSettings {
+        public static final String CLICKED_SORTED_BY = "clicked_sort_by";
     }
 }

@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 
 import udacity.nanodegree.android.manishpathak.in.popularmovies.constants.AppConstants;
 import udacity.nanodegree.android.manishpathak.in.popularmovies.network.api.response.MoviesResponseModel;
+import udacity.nanodegree.android.manishpathak.in.popularmovies.network.api.response.VideoResponseModel;
 
 /**
  * Created by manishpathak on 4/9/16.
@@ -28,4 +29,33 @@ public class CommonUtil {
         genre = genre.replaceAll(" $", "").replaceAll(",$", "");
         return genre;
     }
+
+    /**
+     * Gets url.
+     *
+     * @param video the video
+     * @return the url
+     */
+    public static String getUrl(@NonNull VideoResponseModel video) {
+        if (AppConstants.SITE_YOUTUBE.equalsIgnoreCase(video.getSite())) {
+            return String.format("http://www.youtube.com/watch?v=%1$s", video.getVideoId());
+        } else {
+            return "";
+        }
+    }
+
+    /**
+     * Gets thumbnail url.
+     *
+     * @param video the video
+     * @return the thumbnail url
+     */
+    public static String getThumbnailUrl(@NonNull VideoResponseModel video) {
+        if (AppConstants.SITE_YOUTUBE.equalsIgnoreCase(video.getSite())) {
+            return String.format("http://img.youtube.com/vi/%1$s/0.jpg", video.getVideoId());
+        } else {
+            return "";
+        }
+    }
+
 }

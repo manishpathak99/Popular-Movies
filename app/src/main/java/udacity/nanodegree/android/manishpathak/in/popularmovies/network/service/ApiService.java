@@ -2,8 +2,11 @@ package udacity.nanodegree.android.manishpathak.in.popularmovies.network.service
 
 import retrofit2.Call;
 import retrofit2.http.GET;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 import udacity.nanodegree.android.manishpathak.in.popularmovies.model.MovieModel;
+import udacity.nanodegree.android.manishpathak.in.popularmovies.model.ReviewModel;
+import udacity.nanodegree.android.manishpathak.in.popularmovies.model.VideoModel;
 
 /**
  *
@@ -24,4 +27,22 @@ public interface ApiService {
                                       @Query("page") int page,
                                       @Query("include_adult") boolean includeAdult);
 
+        /**
+         * Gets videos list.
+         *
+         * @param movieId  the movie id
+         * @param api_key  the api key
+         */
+        @GET("/3/movie/{id}/videos")
+        Call<VideoModel>  getVideosList(@Path("id") long movieId, @Query("api_key") String api_key);
+
+        /**
+         * Gets reviews list.
+         *
+         * @param movieId  the movie id
+         * @param api_key  the api key
+         * @param page     the page
+         */
+        @GET("/3/movie/{id}/reviews")
+        Call<ReviewModel>  getReviewsList(@Path("id") long movieId, @Query("api_key") String api_key, @Query("page") int page);
 }
