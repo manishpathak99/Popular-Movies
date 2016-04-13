@@ -2,6 +2,7 @@ package udacity.nanodegree.android.manishpathak.in.popularmovies.adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -20,18 +21,20 @@ import butterknife.ButterKnife;
 import udacity.nanodegree.android.manishpathak.in.popularmovies.R;
 import udacity.nanodegree.android.manishpathak.in.popularmovies.constants.AppConstants;
 import udacity.nanodegree.android.manishpathak.in.popularmovies.network.api.response.MoviesResponseModel;
+import udacity.nanodegree.android.manishpathak.in.popularmovies.ui.activities.MainActivity;
 import udacity.nanodegree.android.manishpathak.in.popularmovies.ui.activities.MovieDetailsActivity;
+import udacity.nanodegree.android.manishpathak.in.popularmovies.ui.fragment.MovieDetailFragment;
 import udacity.nanodegree.android.manishpathak.in.popularmovies.util.CommonUtil;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> {
 
     @NonNull
-    private Context mContext;
+    private MainActivity mContext;
 
     private List<MoviesResponseModel> mMoviesResponseModels = new ArrayList<>();
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public MovieAdapter(Context context, List<MoviesResponseModel> moviesResponseModels) {
+    public MovieAdapter(MainActivity context, List<MoviesResponseModel> moviesResponseModels) {
         this.mContext = context;
         this.mMoviesResponseModels = moviesResponseModels;
     }
@@ -66,10 +69,21 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Context context = view.getContext();
-                Intent intent = new Intent(context, MovieDetailsActivity.class);
-                intent.putExtra(AppConstants.INTENT_EXTRA, movie);
-                context.startActivity(intent);
+                if (mContext.isTwoPane()) {
+                    Bundle arguments = new Bundle();
+                    arguments.putParcelable(AppConstants.INTENT_EXTRA, movie);
+                    MovieDetailFragment fragment = new MovieDetailFragment();
+                    fragment.setArguments(arguments);
+                    mContext.getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.movie_detail_container, fragment)
+                            .commit();
+                } else {
+                    Context context = view.getContext();
+                    Intent intent = new Intent(context, MovieDetailsActivity.class);
+                    intent.putExtra(AppConstants.INTENT_EXTRA, movie);
+                    context.startActivity(intent);
+                }
+
             }
         });
 

@@ -43,6 +43,7 @@ import udacity.nanodegree.android.manishpathak.in.popularmovies.util.FavoriteSha
  */
 public class MovieDetailFragment extends Fragment implements View.OnClickListener{
 
+    private static final String STATE_MOVIES = "state_movies";
     @Bind(R.id.poster_image)
     public ImageView posterImage;
     @Bind(R.id.movie_name)
@@ -69,7 +70,6 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
     public LinearLayout mReviewsView;
     @Bind(R.id.fab)
     public FloatingActionButton mFavorite;
-
     @Nullable
     private MoviesResponseModel moviesResponseModel;
     @Nullable
@@ -87,6 +87,13 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
         favoriteSharedPreference = new FavoriteSharedPreference();
     }
 
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(STATE_MOVIES, moviesResponseModel);
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -99,11 +106,12 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        setHasOptionsMenu(false);
+        if(savedInstanceState != null){
+            moviesResponseModel = savedInstanceState.getParcelable(STATE_MOVIES);
+        }
         setToolBar(view);
-//        initValues();
-//        setToolBar(view);
         loadBackdrop(view);
-//        createContentValues();
         fetchVideoList();
         fetchReviewsList();
     }
@@ -128,10 +136,12 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
     private void initFavorites(){
         boolean isFavorite = false;
         List<FavoriteModel> favoriteModelList = favoriteSharedPreference.loadFavorites(getActivity());
-        for(FavoriteModel favoriteModel : favoriteModelList) {
-            if(favoriteModel.getId() == moviesResponseModel.getId()) {
-                isFavorite = true;
-                break;
+        if(favoriteModelList != null) {
+            for(FavoriteModel favoriteModel : favoriteModelList) {
+                if(favoriteModel.getId() == moviesResponseModel.getId()) {
+                    isFavorite = true;
+                    break;
+                }
             }
         }
         if(isFavorite){
@@ -143,7 +153,7 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
     }
 
     private void setToolBar(@NonNull View view) {
-        mToolbar = (Toolbar) getActivity().findViewById(R.id.detail_toolbar);
+        mToolbar = (Toolbar) view.findViewById(R.id.detail_toolbar);
         mToolbar.setTitle(moviesResponseModel.getTitle());
         ((AppCompatActivity) getActivity()).setSupportActionBar(mToolbar);
     }

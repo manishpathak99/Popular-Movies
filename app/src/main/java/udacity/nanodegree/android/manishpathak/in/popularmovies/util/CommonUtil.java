@@ -1,6 +1,8 @@
 package udacity.nanodegree.android.manishpathak.in.popularmovies.util;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.res.Configuration;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 
@@ -63,6 +65,18 @@ public class CommonUtil {
     public static void showSnackBar(final Activity activity, @NonNull final String message) {
         Snackbar.make(activity.findViewById(android.R.id.content), message, Snackbar.LENGTH_SHORT)
                 .setAction("Action", null).show();
+    }
+
+    /**
+     * Is tablet boolean.
+     *
+     * @param context given context
+     * @return true if its a tablet
+     */
+    public static boolean isTablet(@NonNull Context context) {
+        return (context.getResources().getConfiguration().screenLayout
+                & Configuration.SCREENLAYOUT_SIZE_MASK)
+                >= Configuration.SCREENLAYOUT_SIZE_LARGE;
     }
 
 }

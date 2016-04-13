@@ -31,6 +31,7 @@ import udacity.nanodegree.android.manishpathak.in.popularmovies.model.MovieModel
 import udacity.nanodegree.android.manishpathak.in.popularmovies.network.api.ApiManager;
 import udacity.nanodegree.android.manishpathak.in.popularmovies.network.api.response.MoviesResponseModel;
 import udacity.nanodegree.android.manishpathak.in.popularmovies.util.AppSettings;
+import udacity.nanodegree.android.manishpathak.in.popularmovies.util.CommonUtil;
 import udacity.nanodegree.android.manishpathak.in.popularmovies.util.FavoriteSharedPreference;
 import udacity.nanodegree.android.manishpathak.in.popularmovies.util.NetworkUtil;
 
@@ -49,6 +50,12 @@ public class MainActivity extends BaseActivity implements SwipeRefreshLayout.OnR
     private GridLayoutManager mLayoutManager;
     private MovieAdapter mMovieAdapter;
     private int mPageCount = 1;
+
+    /**
+     * Whether or not the activity is in two-pane mode, i.e. running on a tablet device.
+     */
+    private boolean mTwoPane;
+
     private EndlessRecyclerOnScrollListener mOnScrollListener = new EndlessRecyclerOnScrollListener() {
         @Override
         public void onLoadMore(int current_page) {
@@ -124,8 +131,12 @@ public class MainActivity extends BaseActivity implements SwipeRefreshLayout.OnR
 
     @Override
     protected void init() {
+        if (findViewById(R.id.movie_detail_container) != null) {
+            mTwoPane = true;
+        }
+
         mRecyclerView.setHasFixedSize(true);
-        mLayoutManager = new GridLayoutManager(this, 2);
+        mLayoutManager = new GridLayoutManager(this, CommonUtil.isTablet(this) ? 3 : 2);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mOnScrollListener.setLayoutManager(mLayoutManager);
         mRecyclerView.addOnScrollListener(mOnScrollListener);
@@ -154,6 +165,8 @@ public class MainActivity extends BaseActivity implements SwipeRefreshLayout.OnR
         if (id == R.id.action_settings) {
             return true;
         } else if(id == R.id.action_favorite){
+            AppSettings.setPreference(this, AppSettings.PREF_NAME_POPULAR_MOVIES,
+                    AppConstants.AppSettings.CLICKED_SORTED_BY, "2");
             showFavouriteMovies();
         }
         return super.onOptionsItemSelected(item);
@@ -286,4 +299,13 @@ public class MainActivity extends BaseActivity implements SwipeRefreshLayout.OnR
             mMovieAdapter.getMovies().addAll(mPosterList);
             mMovieAdapter.notifyDataSetChanged();
         }
+
+    /**
+     * Is two pane boolean.
+     *
+     * @return the boolean
+     */
+    public boolean isTwoPane() {
+        return mTwoPane;
+    }
 }
