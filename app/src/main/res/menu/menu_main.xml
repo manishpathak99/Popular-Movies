@@ -3,7 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="udacity.nanodegree.android.manishpathak.in.popularmovies.ui.activities.MainActivity" >
     <item android:id="@+id/action_settings"
+        android:orderInCategory="10"
         android:title="@string/action_settings"
-        android:orderInCategory="100"
         app:showAsAction="never" />
+    <item android:id="@+id/action_favorite"
+        android:orderInCategory="20"
+        android:title="@string/favorites"
+        app:showAsAction="always" />
 </menu>

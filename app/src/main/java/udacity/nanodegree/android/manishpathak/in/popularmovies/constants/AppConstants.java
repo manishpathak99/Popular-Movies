@@ -48,5 +48,6 @@ public final class AppConstants {
     // AppSetting constants
     public static final class AppSettings {
         public static final String CLICKED_SORTED_BY = "clicked_sort_by";
+        public static final String FAVOURITE = "FAVOURITE";
     }
 }

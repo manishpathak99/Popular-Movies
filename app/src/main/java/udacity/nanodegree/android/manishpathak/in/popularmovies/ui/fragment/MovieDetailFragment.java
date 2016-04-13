@@ -2,6 +2,7 @@ package udacity.nanodegree.android.manishpathak.in.popularmovies.ui.fragment;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -27,6 +28,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import udacity.nanodegree.android.manishpathak.in.popularmovies.R;
 import udacity.nanodegree.android.manishpathak.in.popularmovies.constants.AppConstants;
+import udacity.nanodegree.android.manishpathak.in.popularmovies.model.FavoriteModel;
 import udacity.nanodegree.android.manishpathak.in.popularmovies.model.ReviewModel;
 import udacity.nanodegree.android.manishpathak.in.popularmovies.model.VideoModel;
 import udacity.nanodegree.android.manishpathak.in.popularmovies.network.api.ApiManager;
@@ -34,6 +36,7 @@ import udacity.nanodegree.android.manishpathak.in.popularmovies.network.api.resp
 import udacity.nanodegree.android.manishpathak.in.popularmovies.network.api.response.ReviewResponseModel;
 import udacity.nanodegree.android.manishpathak.in.popularmovies.network.api.response.VideoResponseModel;
 import udacity.nanodegree.android.manishpathak.in.popularmovies.util.CommonUtil;
+import udacity.nanodegree.android.manishpathak.in.popularmovies.util.FavoriteSharedPreference;
 
 /**
  * Created by manishpathak on 4/8/16.
@@ -72,6 +75,8 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
     @Nullable
     private Toolbar mToolbar = null;
     private List<VideoResponseModel> videoArrayList;
+    private boolean isFavourite = false;
+    private FavoriteSharedPreference favoriteSharedPreference;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -79,6 +84,7 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
         if (getArguments().containsKey(AppConstants.INTENT_EXTRA)) {
             moviesResponseModel = getArguments().getParcelable(AppConstants.INTENT_EXTRA);
         }
+        favoriteSharedPreference = new FavoriteSharedPreference();
     }
 
     @Nullable
@@ -116,6 +122,24 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(posterImage);
 
+        initFavorites();
+    }
+
+    private void initFavorites(){
+        boolean isFavorite = false;
+        List<FavoriteModel> favoriteModelList = favoriteSharedPreference.loadFavorites(getActivity());
+        for(FavoriteModel favoriteModel : favoriteModelList) {
+            if(favoriteModel.getId() == moviesResponseModel.getId()) {
+                isFavorite = true;
+                break;
+            }
+        }
+        if(isFavorite){
+            showFavourites();
+        } else {
+            showUnFavourites();
+        }
+        mFavorite.setOnClickListener(this);
     }
 
     private void setToolBar(@NonNull View view) {
@@ -274,9 +298,55 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
                     }
                     break;
                 case R.id.fab:
+                    setFavourites();
+                    break;
                 default:
                     break;
             }
+        }
+    }
+
+
+    private void setFavourites() {
+        FavoriteModel favoriteModel = new FavoriteModel(moviesResponseModel.getId(), moviesResponseModel.getTitle());
+        favoriteModel.setPosterPath(moviesResponseModel.getPosterPath());
+        favoriteModel.setBackdropPath(moviesResponseModel.getBackdropPath());
+        favoriteModel.setOriginalTitle(moviesResponseModel.getOriginalTitle());
+        favoriteModel.setOverview(moviesResponseModel.getOverview());
+        favoriteModel.setVoteAverage(moviesResponseModel.getVoteAverage());
+        favoriteModel.setReleaseDate(moviesResponseModel.getReleaseDate());
+        favoriteModel.setGenreId(moviesResponseModel.getGenreId());
+        if (isFavourite) {
+            showUnFavourites();
+            boolean success = favoriteSharedPreference.removeFavorite(getActivity(), favoriteModel);
+            if (success) {
+                CommonUtil.showSnackBar(getActivity(), "Removed " + moviesResponseModel.getTitle() + " from favourites");
+            }
+        } else {
+            showFavourites();
+            boolean success = favoriteSharedPreference.addFavorite(getActivity(), favoriteModel);
+            if (success) {
+                CommonUtil.showSnackBar(getActivity(),"Added " + moviesResponseModel.getTitle() + " to favourites");
+            }
+        }
+    }
+
+
+    public void showFavourites() {
+        isFavourite = true;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            mFavorite.setImageDrawable(getContext().getResources().getDrawable(R.drawable.ic_favorite_full, getActivity().getTheme()));
+        } else {
+            mFavorite.setImageDrawable(getContext().getResources().getDrawable(R.drawable.ic_favorite_full));
+        }
+    }
+
+    public void showUnFavourites() {
+        isFavourite = false;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            mFavorite.setImageDrawable(getContext().getResources().getDrawable(R.drawable.ic_favorite_border, getActivity().getTheme()));
+        } else {
+            mFavorite.setImageDrawable(getContext().getResources().getDrawable(R.drawable.ic_favorite_border));
         }
     }
 }

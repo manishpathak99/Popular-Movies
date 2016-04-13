@@ -17,6 +17,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.RelativeLayout;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -25,10 +26,12 @@ import udacity.nanodegree.android.manishpathak.in.popularmovies.adapter.MovieAda
 import udacity.nanodegree.android.manishpathak.in.popularmovies.constants.AppConstants;
 import udacity.nanodegree.android.manishpathak.in.popularmovies.enums.SortingOrder;
 import udacity.nanodegree.android.manishpathak.in.popularmovies.listener.EndlessRecyclerOnScrollListener;
+import udacity.nanodegree.android.manishpathak.in.popularmovies.model.FavoriteModel;
 import udacity.nanodegree.android.manishpathak.in.popularmovies.model.MovieModel;
 import udacity.nanodegree.android.manishpathak.in.popularmovies.network.api.ApiManager;
 import udacity.nanodegree.android.manishpathak.in.popularmovies.network.api.response.MoviesResponseModel;
 import udacity.nanodegree.android.manishpathak.in.popularmovies.util.AppSettings;
+import udacity.nanodegree.android.manishpathak.in.popularmovies.util.FavoriteSharedPreference;
 import udacity.nanodegree.android.manishpathak.in.popularmovies.util.NetworkUtil;
 
 public class MainActivity extends BaseActivity implements SwipeRefreshLayout.OnRefreshListener, DialogInterface.OnClickListener{
@@ -42,11 +45,10 @@ public class MainActivity extends BaseActivity implements SwipeRefreshLayout.OnR
     public SwipeRefreshLayout swipeLayout;
     @Bind(R.id.sort_layout)
     public RelativeLayout mSortFooterLayout;
-
+    FavoriteSharedPreference favoriteSharedPreference;
     private GridLayoutManager mLayoutManager;
     private MovieAdapter mMovieAdapter;
     private int mPageCount = 1;
-
     private EndlessRecyclerOnScrollListener mOnScrollListener = new EndlessRecyclerOnScrollListener() {
         @Override
         public void onLoadMore(int current_page) {
@@ -55,7 +57,15 @@ public class MainActivity extends BaseActivity implements SwipeRefreshLayout.OnR
                 return;
             }
             Log.e("PAge Count", mPageCount + "");
-            fetchMovieList(mPageCount + 1);
+
+            String preSelectedIndexStr = (String) AppSettings.getPrefernce(MainActivity.this, AppSettings.PREF_NAME_POPULAR_MOVIES,
+                    AppConstants.AppSettings.CLICKED_SORTED_BY, "0");
+            int preSelectedIndex = Integer.parseInt(preSelectedIndexStr);
+            if(preSelectedIndex > 1) {
+                showFavouriteMovies();
+            } else {
+                fetchMovieList(SortingOrder.values()[preSelectedIndex].getSortedBy(), mPageCount + 1);
+            }
         }
 
         @Override
@@ -72,7 +82,7 @@ public class MainActivity extends BaseActivity implements SwipeRefreshLayout.OnR
         public void onLoadMore() {
 
         }
-    };;
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,8 +91,8 @@ public class MainActivity extends BaseActivity implements SwipeRefreshLayout.OnR
         ButterKnife.bind(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-//        Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                .setAction("Action", null).show();
+        favoriteSharedPreference = new FavoriteSharedPreference();
+
         if (savedInstanceState != null) {
             mPageCount = savedInstanceState.getInt(STATE_PAGE_COUNT, 1);
         }
@@ -90,7 +100,26 @@ public class MainActivity extends BaseActivity implements SwipeRefreshLayout.OnR
                 ? savedInstanceState.<MoviesResponseModel>getParcelableArrayList(STATE_MOVIES) : new ArrayList<MoviesResponseModel>();
         mMovieAdapter = new MovieAdapter(this, restoredMovies);
         init();
-        fetchMovieList(1);
+
+        String preSelectedIndexStr = (String) AppSettings.getPrefernce(this, AppSettings.PREF_NAME_POPULAR_MOVIES,
+                AppConstants.AppSettings.CLICKED_SORTED_BY, "0");
+        int preSelectedIndex = Integer.parseInt(preSelectedIndexStr);
+        if(preSelectedIndex > 1) {
+            showFavouriteMovies();
+        } else {
+            fetchMovieList(SortingOrder.values()[preSelectedIndex].getSortedBy(), 1);
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        String preSelectedIndexStr = (String) AppSettings.getPrefernce(MainActivity.this, AppSettings.PREF_NAME_POPULAR_MOVIES,
+                AppConstants.AppSettings.CLICKED_SORTED_BY, "0");
+        int preSelectedIndex = Integer.parseInt(preSelectedIndexStr);
+        if(preSelectedIndex > 1) {
+            showFavouriteMovies();
+        }
     }
 
     @Override
@@ -124,6 +153,8 @@ public class MainActivity extends BaseActivity implements SwipeRefreshLayout.OnR
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
+        } else if(id == R.id.action_favorite){
+            showFavouriteMovies();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -135,12 +166,9 @@ public class MainActivity extends BaseActivity implements SwipeRefreshLayout.OnR
         outState.putInt(STATE_PAGE_COUNT, mPageCount);
     }
 
-    private void fetchMovieList(final int pageCount) {
-        String preSelectedIndexStr = (String) AppSettings.getPrefernce(this, AppSettings.PREF_NAME_POPULAR_MOVIES,
-                AppConstants.AppSettings.CLICKED_SORTED_BY, "0");
-        int preSelectedIndex = Integer.parseInt(preSelectedIndexStr);
-        fetchMovieList(SortingOrder.values()[preSelectedIndex].getSortedBy(), pageCount);
-    }
+//    private void fetchMovieList(final int pageCount) {
+//        fetchMovieList(SortingOrder.values()[preSelectedIndex].getSortedBy(), pageCount);
+//    }
     private void fetchMovieList(final String sortOrder, final int pageCount){
         ApiManager.getInstance().fetchMoviesList(new ApiManager.ProgressListener<MovieModel>() {
             @Override
@@ -182,7 +210,14 @@ public class MainActivity extends BaseActivity implements SwipeRefreshLayout.OnR
                     NetworkUtil.showNetWorkSnackBar(MainActivity.this);
                     return;
                 }
-                fetchMovieList(1);
+                String preSelectedIndexStr = (String) AppSettings.getPrefernce(MainActivity.this, AppSettings.PREF_NAME_POPULAR_MOVIES,
+                        AppConstants.AppSettings.CLICKED_SORTED_BY, "0");
+                int preSelectedIndex = Integer.parseInt(preSelectedIndexStr);
+                if(preSelectedIndex > 1) {
+                    showFavouriteMovies();
+                } else {
+                    fetchMovieList(SortingOrder.values()[preSelectedIndex].getSortedBy(), mPageCount + 1);
+                }
             }
         }, 500);
     }
@@ -194,14 +229,18 @@ public class MainActivity extends BaseActivity implements SwipeRefreshLayout.OnR
     @Override
     public void onClick(DialogInterface dialogInterface, int clickedIndex) {
         dialogInterface.dismiss();
+        AppSettings.setPreference(this, AppSettings.PREF_NAME_POPULAR_MOVIES,
+                AppConstants.AppSettings.CLICKED_SORTED_BY, String.valueOf(clickedIndex));
         if (!NetworkUtil.checkInternetConnection(MainActivity.this)) {
             NetworkUtil.showNetWorkSnackBar(MainActivity.this);
             return;
         }
         clearAdapter();
-        AppSettings.setPreference(this, AppSettings.PREF_NAME_POPULAR_MOVIES,
-                AppConstants.AppSettings.CLICKED_SORTED_BY, String.valueOf(clickedIndex));
-        fetchMovieList(1);
+        if(clickedIndex > 1) {
+            showFavouriteMovies();
+        } else {
+            fetchMovieList(SortingOrder.values()[clickedIndex].getSortedBy(), 1);
+        }
     }
 
     /**
@@ -223,4 +262,28 @@ public class MainActivity extends BaseActivity implements SwipeRefreshLayout.OnR
         mSortFooterLayout.animate().translationY(mSortFooterLayout.getHeight()).
                 setInterpolator(new AccelerateInterpolator(2));
     }
+
+    /**
+     * show Favourite movies from shared preference
+     */
+    private void showFavouriteMovies() {
+        List<FavoriteModel> favoriteModelList = favoriteSharedPreference.loadFavorites(this);
+        ArrayList<MoviesResponseModel> mPosterList = new ArrayList<>();
+            for(FavoriteModel favoriteModel :favoriteModelList){
+                MoviesResponseModel resultModel = new MoviesResponseModel();
+                resultModel.setTitle(favoriteModel.getTitle());
+                resultModel.setPosterPath(favoriteModel.getPosterPath());
+                resultModel.setBackdropPath(favoriteModel.getBackdropPath());
+                resultModel.setOriginalTitle(favoriteModel.getOriginalTitle());
+                resultModel.setOverview(favoriteModel.getOverview());
+                resultModel.setVoteAverage(favoriteModel.getVoteAverage());
+                resultModel.setReleaseDate(favoriteModel.getReleaseDate());
+                resultModel.setId(favoriteModel.getId());
+                resultModel.setGenreId(favoriteModel.getGenreId());
+                mPosterList.add(resultModel);
+            }
+            clearAdapter();
+            mMovieAdapter.getMovies().addAll(mPosterList);
+            mMovieAdapter.notifyDataSetChanged();
+        }
 }

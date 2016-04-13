@@ -1,6 +1,8 @@
 package udacity.nanodegree.android.manishpathak.in.popularmovies.util;
 
+import android.app.Activity;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 
 import udacity.nanodegree.android.manishpathak.in.popularmovies.constants.AppConstants;
 import udacity.nanodegree.android.manishpathak.in.popularmovies.network.api.response.MoviesResponseModel;
@@ -56,6 +58,11 @@ public class CommonUtil {
         } else {
             return "";
         }
+    }
+
+    public static void showSnackBar(final Activity activity, @NonNull final String message) {
+        Snackbar.make(activity.findViewById(android.R.id.content), message, Snackbar.LENGTH_SHORT)
+                .setAction("Action", null).show();
     }
 
 }
