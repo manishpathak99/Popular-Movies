@@ -11,7 +11,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +21,7 @@ import udacity.nanodegree.android.manishpathak.in.popularmovies.R;
 import udacity.nanodegree.android.manishpathak.in.popularmovies.constants.AppConstants;
 import udacity.nanodegree.android.manishpathak.in.popularmovies.network.api.response.MoviesResponseModel;
 import udacity.nanodegree.android.manishpathak.in.popularmovies.ui.activities.MovieDetailsActivity;
+import udacity.nanodegree.android.manishpathak.in.popularmovies.util.CommonUtil;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> {
 
@@ -29,28 +29,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
     private Context mContext;
 
     private List<MoviesResponseModel> mMoviesResponseModels = new ArrayList<>();
-
-    // Provide a reference to the views for each data item
-    // Complex data items may need more than one view per item, and
-    // you provide access to all the views for a data item in a view holder
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        // each data item is just a string in this case
-        @Bind(R.id.movie_item_genres)
-        TextView mMovieId;
-        @Bind(R.id.movie_item_title)
-        TextView mMovieName;
-        @Bind(R.id.image_movie)
-        ImageView mImageView;
-
-        @NonNull
-        private final View mView;
-
-        public ViewHolder(@NonNull View view) {
-            super(view);
-            mView = view;
-            ButterKnife.bind(this, view);
-        }
-    }
 
     // Provide a suitable constructor (depends on the kind of dataset)
     public MovieAdapter(Context context, List<MoviesResponseModel> moviesResponseModels) {
@@ -76,14 +54,13 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         final MoviesResponseModel movie = mMoviesResponseModels.get(position);
-//        holder.mMovieId.setText(CommonUtil.getGenreList(movies));
+        holder.mMovieId.setText(CommonUtil.getGenreList(movie));
         holder.mMovieName.setText(movie.getTitle());
         Glide.with(mContext)
                 .load(AppConstants.POSTER_API_BASE_URL + movie.getPosterPath())
                 .error(R.drawable.placeholder)
                 .placeholder(R.drawable.placeholder)
                 .centerCrop()
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(holder.mImageView);
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
@@ -104,7 +81,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
         return mMoviesResponseModels.size();
     }
 
-
     public List<MoviesResponseModel> getMovies() {
         return mMoviesResponseModels;
     }
@@ -119,5 +95,26 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
             mMoviesResponseModels = new ArrayList();
         }
         mMoviesResponseModels.add(moviesResponseModel);
+    }
+
+    // Provide a reference to the views for each data item
+    // Complex data items may need more than one view per item, and
+    // you provide access to all the views for a data item in a view holder
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        @NonNull
+        private final View mView;
+        // each data item is just a string in this case
+        @Bind(R.id.movie_item_genres)
+        TextView mMovieId;
+        @Bind(R.id.movie_item_title)
+        TextView mMovieName;
+        @Bind(R.id.image_movie)
+        ImageView mImageView;
+
+        public ViewHolder(@NonNull View view) {
+            super(view);
+            mView = view;
+            ButterKnife.bind(this, view);
+        }
     }
 }
